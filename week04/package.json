@@ -1,0 +1,16 @@
+{
+  "name": "week04",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Study04.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
