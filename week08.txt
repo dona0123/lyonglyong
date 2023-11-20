@@ -1,0 +1,498 @@
+
+Hook
+Hook은 React 버전 16.8부터 React 요소로 새로 추가되었다. Hook을 이용하여 기존 Class 바탕의 코드를 작성할 필요 없이 상태 값과 여러 React의 기능을 사용할 수 있다. 
+
+
+
+
+
+useState
+
+가장 기본적인 Hook으로, 함수형 컴포넌트에서도 가변적인 상태를 지닐 수 있게 해 준다. 
+
+
+
+📌사용법
+
+const [변수명, set함수명] = useState(초기값); 
+
+
+useState 기능을 사용한 숫자 카운터 구현
+
+import React, { useState } from 'react';
+ 
+const Counter = () => {
+  const [value, setValue] = useState(0);
+ 
+  return (
+    <div>
+      <p>
+        현재 카운터 값은 <b>{value}</b>입니다.
+      </p>
+      <button onClick={() => setValue(value + 1)}>+1</button>
+      <button onClick={() => setValue(value - 1)}>-1</button>
+    </div>
+  );
+};
+
+export default Counter;
+
+
+
+
+useEffect
+
+Side effect를 수행하기 위한 Hook으로, 리액트 컴포넌트가 렌더링될 때마다 특정 작업을 수행하도록 설정할 수 있게 한다.
+
+또한, 생명 주기 함수와 동일한 기능을 수행할 수 있다. 
+
+
+
+📌 Side effect
+
+리액트에서의 사이드 이펙트는 그냥 효과&영향을 뜻하는 것에 가깝다.  
+
+다른 컴포넌트에 영향을 미칠 수 있고, 렌더링 중에는 작업이 완료될 수 없다.
+
+렌더링이 끝난 이후에 실행되어야 하는 작업들이, 사이드로 실행된다는 의미이다. 
+
+
+
+📌사용법
+
+- 배열의 값이 변경되었을 때, 이펙트 함수가 실행된다. 
+
+이펙트 함수는 처음 컴포넌트가 렌더링 된 이후, 업데이트로 인한 재렌더링 이후에 실행된다. 
+
+useEffect(이펙트 함수, 의존성 배열); 
+
+
+- 다음은 이펙트 함수가 mount, unmount시에 한 번씩만 실행된다. 
+
+useEffect(이펙트 함수, []); 
+
+
+- 다음은 컴포넌트가 업데이트될 때마다 호출된다. 
+
+useEffect(이펙트 함수); 
+
+
+- 다음은 컴포넌트가 unmount될 때 호출된다. 
+
+useEffect(() => {
+// 컴포넌트가 마운트될 때 실행되는 코드
+
+// 반환된 함수는 언마운트 시 실행된다.
+return () =>
+{ console.log('컴포넌트가 언마운트될 때 정리 작업을 수행합니다.');
+};
+}, []); // 빈 의존성 배열을 전달하여 마운트될 때 한 번만 실행
+
+
+정리하면 다음과 같다. 
+
+useEffect(() -> {
+  // 컴포넌트가 마운트 된 이후, 
+  // 의존성 배열에 있는 변수들 중 하나라도 값이 변경되었을 때 실행된다. 
+  // 의존성 배열에 빈 배열( [] )을 넣으면 마운트와 언마운트시에 단 한 번씩만 실행된다. 
+  // 의존성 배열 생략 시 컴포넌트 업데이트 시마다 실행된다. 
+  . . .
+
+  return () => {
+    // 컴포넌트가 마운트 해제되기 전에 실행된다. 
+    . . .
+  }
+}, [의존성 변수1, 의존성 변수2, . . . ]); 
+
+
+
+
+여기서 useEffect는 컴포넌트가 렌더링될 때마다 실행된다. 그러나 의존성 배열이 비어 있기 때문에 어떤 특정한 상태의 변경을 감지하지 않고 항상 실행된다. 
+
+import React, { useState, useEffect } from 'react';
+ 
+const Info = () => {
+  const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
+  useEffect(() => {
+    console.log('렌더링이 완료되었습니다!');
+    console.log({
+      name,
+      nickname
+    });
+  });
+ 
+  const onChangeName = e => {
+    setName(e.target.value);
+  };
+ 
+  const onChangeNickname = e => {
+    setNickname(e.target.value);
+  };
+ 
+  return (
+    (...)
+  );
+};
+ 
+export default Info;
+
+
+
+
+useReducer
+
+useState보다 더 다양한 컴포넌트 상황에 따라 다양한 상태를 다른 값으로 업데이트해 주고 싶을 때 사용한다. 
+
+
+
+📌 리듀서
+
+현재 상태, 그리고 업데이트를 위해 필요한 정보를 담은 액션(action) 값을 전달받아 새로운 상태를 반환하는 함수이다. 리듀서 함수에서 새로운 상태를 만들 때는 반드시 불변성을 지켜 주어야 한다. 
+
+function reducer(state, action) {
+return { ... }; // 불변성을 지키면서 업데이트한 새로운 상태를 반환한다.
+}
+
+
+📌 액션 값의 형태 
+
+useReducer에서 사용하는 액션 객체는 반드시 type을 지니고 있을 필요가 없다. 객체가 아니라 문자열이나 숫자여도 상관없다.
+
+{
+  type: 'INCREMENT',
+  // 다른 값들이 필요하다면 추가로 들어간다.
+}
+
+
+
+
+useReducer를 활용하여 상태 관리를 수행하고, 버튼 클릭에 따라 카운터 값을 증가 또는 감소시켜 본다. 
+
+import React, { useReducer } from 'react';
+
+// Reducer 함수
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return { count: state.count + 1 };
+    case 'DECREMENT':
+      return { count: state.count - 1 };
+    default:
+      return state;
+  }
+};
+
+const Counter = () => {
+  // useReducer를 사용하여 상태와 디스패치 함수를 얻는다.
+  const [state, dispatch] = useReducer(reducer, { count: 0 }); // 인자로 reducer 함수, 초기 상태 전달
+
+  return (
+    <div>
+      <p>Count: {state.count}</p>
+      <button onClick={() => dispatch({ type: 'INCREMENT' })}>Increment</button>
+      <button onClick={() => dispatch({ type: 'DECREMENT' })}>Decrement</button>
+    </div>
+  );
+};
+
+export default Counter;
+
+
+
+
+useMemo
+
+Memoized value를 리턴하는 Hook이다.
+
+함수형 컴포넌트 내부에서 발생하는 연산을 최적화할 때 사용한다. 
+
+일반적으로 렌더링이 일어나는 동안 실행돼서는 안될 작업을 useMemo의 함수에 넣으면 안 된다. (ex. 사이드 이펙트)
+
+
+
+📌 Memoized value
+
+연산량이 많이 드는 함수의 호출 결과를 저장해 두는 값이다.
+
+이후 같은 입력 값으로 함수를 호풀하면, 새로 함수를 호출하지 않고 이전에 저장해 놨던 호출 결과를 바로 반환할 수 있다. 
+
+
+
+📌사용법
+
+const memoizedValue = useMemo(
+  () => {
+    // 연산량이 높은 작업을 수행하여 결과를 반환 
+    return computeExpensiveValue(의존성 변수1, 의존성 변수2); 
+  }, 
+  [의존성 변수1, 의존성 변수2]
+); 
+
+
+✔️ 의존성 배열에 들어있는 변수가 변했을 경우에만 새로 creat함수를 호출하여 결과값을 반환한다. 
+
+✔️ 의존성 배열을 넣지 않을 경우, 매 렌더링 떄마다 함수가 실행된다. 
+
+✔️ 의존성 배열이 빈 배열일 경우, 컴포넌트 마운트 시에만 함수가 실행된다. 
+
+
+
+
+
+리스트에 숫자를 추가하면 추가된 숫자들의 평균을 보여 주는 함수형 컴포넌트를 작성해 본다.
+
+import React, { useState } from 'react';
+ 
+const getAverage = numbers => {
+  console.log('평균값 계산 중..');
+  if (numbers.length === 0) return 0;
+  const sum = numbers.reduce((a, b) => a + b);
+  return sum / numbers.length;
+};
+ 
+const Average = () => {
+  const [list, setList] = useState([]);
+  const [number, setNumber] = useState('');
+ 
+  const onChange = e => {
+    setNumber(e.target.value);
+  };
+  const onInsert = e => {
+    const nextList = list.concat(parseInt(number));
+    setList(nextList);
+    setNumber('');
+  };
+ 
+  return (
+    <div>
+      <input value={number} onChange={onChange} />
+      <button onClick={onInsert}>등록</button>
+      <ul>
+        {list.map((value, index) => (
+          <li key={index}>{value}</li>
+        ))}
+      </ul>
+      <div>
+        <b>평균값:</b> {getAverage(list)}
+      </div>
+    </div>
+  );
+};
+ 
+export default Average;
+
+
+
+
+useCallback
+
+useCallback은 useMemo와 상당히 비슷한 함수이지만, 값이 아닌 함수를 반환한다. 
+
+주로 렌더링 성능을 최적화해야 하는 상황에서 사용한다.
+
+이 Hook을 사용하면 이벤트 핸들러 함수를 필요할 때만 생성할 수 있다.
+
+특정 변수의 값이 변할 때만 함수를 다시 정의하도록 한다. 
+
+
+
+📌사용법
+
+const memoizedCallback = useCallback( 
+  () => {
+    doSomething(의존성 변수1, 의존성 변수2); // 콜백 
+  },
+  [의존성 변수1, 의존성 변수2] // 변경 시 콜백 함수 반환 
+); 
+
+
+따라서 아래 두 줄의 코드는 동일한 기능을 수행한다. 
+
+useCallback(함수, 의존성 배열); 
+useMemo(() => 함수, 의존성 배열); 
+
+
+
+
+위에서 구현한 Average 컴포넌트는 onChange와 onInsert라는 함수를 선언해 주었다. 이렇게 선언하면 컴포넌트가 리렌더링될 때마다 이 함수들이 새로 생성된다. 대부분의 경우 이러한 방식은 문제없지만, 컴포넌트의 렌더링이 자주 발생하거나 렌더링해야 할 컴포넌트의 개수가 많아지면 이 부분을 최적화해 주는 것이 좋다. 
+
+
+
+ useCallback을 사용하여 Average 컴포넌트를 최적화해 본다. 
+
+import React, { useState, useCallback } from 'react';
+
+const getAverage = numbers => {
+  console.log('평균값 계산 중..');
+  if (numbers.length === 0) return 0;
+  const sum = numbers.reduce((a, b) => a + b);
+  return sum / numbers.length;
+};
+
+const Average = () => {
+  const [list, setList] = useState([]);
+  const [number, setNumber] = useState('');
+
+  const onChange = useCallback(e => {
+    setNumber(e.target.value);
+  }, []); // 빈 배열을 전달하여 컴포넌트가 처음 마운트될 때만 함수를 생성
+
+  const onInsert = useCallback(() => {
+    const nextList = list.concat(parseInt(number));
+    setList(nextList);
+    setNumber('');
+  }, [list, number]); // list 또는 number가 변경될 때마다 함수를 생성
+
+  return (
+    <div>
+      <input value={number} onChange={onChange} />
+      <button onClick={onInsert}>등록</button>
+      <ul>
+        {list.map((value, index) => (
+          <li key={index}>{value}</li>
+        ))}
+      </ul>
+      <div>
+        <b>평균값:</b> {getAverage(list)}
+      </div>
+    </div>
+  );
+};
+
+export default Average;
+
+
+
+
+useRef
+
+useRef은 Reference를 사용하기 위한 Hook이다. 
+
+
+
+📌 Reference 
+
+특정 컴포넌트에 접근할 수 있는 객체이다. useRef는 이 Reference 객체를 반환한다.
+
+Reference객체에는 current라는 속성이 있는데, 이는 현재 참조하고 있는 엘리먼트를 의미한다.
+
+useRef를 사용하여 Reference를 설정하면 useRef를 통해 만든 객체 안의 current 값이 실제 엘리먼트를 가리킨다. 
+
+ refObject.current 
+
+
+📌사용법
+
+초깃값으로 초기화된 Reference 객체를 반환한다. 
+
+만약 초깃값이 null이라면, current의 값이 null인 Reference 객체를 반환한다. 
+
+이 객체는 컴포넌트의 mount해제 전까지는 계속 유지된다.
+
+const refContainer = useRef(초깃값); 
+
+
+Average 컴포넌트에서 등록 버튼을 눌렀을 때 포커스가 인풋 쪽으로 넘어가도록 코드를 작성해 본다. 
+
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+ 
+const getAverage = numbers => {
+  console.log('평균값 계산 중..');
+  if (numbers.length === 0) return 0;
+  const sum = numbers.reduce((a, b) => a + b);
+  return sum / numbers.length;
+};
+ 
+const Average = () => {
+  const [list, setList] = useState([]);
+  const [number, setNumber] = useState('');
+  const inputEl = useRef(null);
+ 
+  const onChange = useCallback(e => {
+    setNumber(e.target.value);
+  }, []); // 컴포넌트가 처음 렌더링될 때만 함수 생성
+const onInsert = useCallback(() => {
+    const nextList = list.concat(parseInt(number));
+    setList(nextList);
+    setNumber('');
+    inputEl.current.focus();
+  }, [number, list]); // number 혹은 list가 바뀌었을 때만 함수 생성
+ 
+  const avg = useMemo(() => getAverage(list), [list]);
+ 
+  return (
+    <div>
+      <input value={number} onChange={onChange} ref={inputEl} />
+      <button onClick={onInsert}>등록</button>
+      <ul>
+        {list.map((value, index) => (
+          <li key={index}>{value}</li>
+        ))}
+      </ul>
+      <div>
+        <b>평균값:</b> {avg}
+      </div>
+    </div>
+  );
+};
+ 
+export default Average;
+
+
+
+
+커스텀 Hooks 만들기
+
+여러 컴포넌트에서 비슷한 기능을 공유할 경우, 이를 자신만의 Hook으로 작성하여 로직을 재사용할 수 있다.
+
+기존에 Info 컴포넌트에서 여러 개의 인풋을 관리하기 위해 useReducer로 작성했던 로직을 useInputs라는 Hook으로 따로 분리해 본다.
+
+
+
+📌 Hook의 규칙 
+
+1. 무조건 최상위 레벨에서만 호출해야 한다. 
+
+2. 리액트 함수 컴포넌트에서만 호출해야 한다. 
+
+eslint-plugin-react-hooks 플러그인을 참고하면 규칙을 지키는 데 도움이 된다. 
+
+
+
+
+
+src 디렉터리에 useInputs.js 파일을 만들고 다음 코드를 작성해 보자.
+
+import { useReducer } from 'react';
+ 
+function reducer(state, action) {
+  return {
+    ...state,
+    [action.name]: action.value
+  };
+}
+ 
+export default function useInputs(initialForm) {
+  const [state, dispatch] = useReducer(reducer, initialForm);
+  const onChange = e => {
+    dispatch(e.target);
+  };
+  return [state, onChange];
+}
+
+
+
+
+다른 Hooks
+
+이번에 커스텀 Hooks를 만들어서 사용했던 것처럼, 다른 개발자가 만든 Hooks도 라이브러리로 설치하여 사용할 수 있다.
+
+다른 개발자가 만든 다양한 Hooks 리스트는 다음 링크에서 확인할 수 있다.
+
+
+
+• https://nikgraf.github.io/react-hooks/
+
+• https://github.com/rehooks/awesome-react-hooks
+
